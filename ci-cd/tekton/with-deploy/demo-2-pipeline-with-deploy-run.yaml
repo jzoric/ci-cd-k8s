@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: demo-2-pipeline-with-deploy-run-3
+  namespace: demo-2
+spec:
+  serviceAccountName: demo-2-sa
+  pipelineRef:
+    name: demo-2-pipeline-with-deploy
+  resources:
+    - name:  source-repository
+      resourceRef:
+        name: demo-2-git-resource
+    - name: docker-image
+      resourceRef:
+        name: demo-2-image-resource

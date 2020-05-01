@@ -1,0 +1,59 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: demo-2-pipeline-with-deploy
+  namespace: demo-2
+spec:
+  resources:
+    - name: source-repository
+      type: git
+    - name: docker-image
+      type: image
+  tasks:
+    - name: build-and-push
+      taskRef:
+        name: demo-2-task
+      params:
+        - name: pathToDockerFile
+          value: Dockerfile
+        - name: pathToContext
+          value: $(resources.inputs.docker-source.path)/demo-2
+      resources:
+        inputs:
+          - name: docker-source
+            resource: source-repository
+        outputs:
+          - name: builtImage
+            resource: docker-image
+    - name: deploy-via-kubectl
+      runAfter:
+        - build-and-push
+      taskRef:
+        name: kubectl-deploy-task
+      params:
+        - name: manifest
+          value: |
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: app
+              namespace: demo-2
+              labels:
+                name: app
+            spec:
+              selector:
+                matchLabels:
+                  app: app
+              template:
+                metadata:
+                  name: app
+                  labels:
+                    app: app
+                spec:
+                  containers:
+                    - image: "gcr.io/jovica-gcp/demo-2:latest"
+                      imagePullPolicy: Always
+                      name: app
+                      ports:
+                        - containerPort: 8080
+
