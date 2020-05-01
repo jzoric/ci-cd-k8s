@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keel-demo-2-deployment
+  annotations:
+    keel.sh/policy: minor
+  namespace: demo-2
+  labels:
+    name: keel-demo-2
+spec:
+  selector:
+    matchLabels:
+      app: keel-demo-2
+  template:
+    metadata:
+      name: keel-demo-2
+      labels:
+        app: keel-demo-2
+    spec:
+      containers:
+        - image: "gcr.io/jovica-gcp/demo-2"
+          imagePullPolicy: Always
+          name: keel-demo-2
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keel-demo-2-service
+  namespace: demo-2
+  labels:
+    app: keel-demo-2
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: keel-demo-2
+  selector:
+    app: keel-demo-2
+  sessionAffinity: None
+
