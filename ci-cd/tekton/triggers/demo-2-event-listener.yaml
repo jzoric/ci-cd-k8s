@@ -1,0 +1,12 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: demo-2-event-listener
+  namespace: demo-2
+spec:
+  serviceAccountName: tekton-triggers-admin
+  triggers:
+    - bindings:
+        - name: demo-2-trigger-binding
+      template:
+        name: demo-2-trigger-template

@@ -1,0 +1,34 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: demo-2-trigger-template
+  namespace: demo-2
+spec:
+  params:
+    - name: gitrevision
+      description: The git revision
+      default: master
+    - name: gitrepositoryurl
+      description: The git repository url
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        name: demo-2-pipeline-run-$(uid)
+        namespace: demo-2
+      spec:
+        serviceAccountName: tekton-triggers-admin
+        pipelineRef:
+          name: demo-2-pipeline
+        resources:
+          - name: source-repository
+            resourceSpec:
+              type: git
+              params:
+                - name: revision
+                  value: $(params.gitrevision)
+                - name: url
+                  value: $(params.gitrepositoryurl)
+          - name: docker-image
+            resourceRef:
+              name: demo-2-image-resource
