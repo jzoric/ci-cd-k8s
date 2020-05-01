@@ -1,0 +1,27 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: demo-2-pipeline
+  namespace: demo-2
+spec:
+  resources:
+    - name: source-repository
+      type: git
+    - name: docker-image
+      type: image
+  tasks:
+    - name: build-and-push-demo-2
+      taskRef:
+        name: demo-2-task
+      params:
+        - name: pathToDockerFile
+          value: Dockerfile
+        - name: pathToContext
+          value: $(resources.inputs.docker-source.path)/demo-2
+      resources:
+        inputs:
+          - name: docker-source
+            resource: source-repository
+        outputs:
+          - name: builtImage
+            resource: docker-image

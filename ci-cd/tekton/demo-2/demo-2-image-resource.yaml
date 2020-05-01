@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: demo-2-image-resource
+  namespace: demo-2
+spec:
+  type: image
+  params:
+    - name: url
+      value: gcr.io/jovica-gcp/demo-2
