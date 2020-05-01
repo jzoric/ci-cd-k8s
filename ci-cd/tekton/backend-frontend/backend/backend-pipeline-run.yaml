@@ -1,0 +1,18 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: backend-pipeline-run
+spec:
+  serviceAccountName: backend-frontend-sa
+  pipelineRef:
+    name: backend-pipeline
+  workspaces:
+    - name: maven-settings
+      emptyDir: {}
+    - name: shared-workspace
+      persistentvolumeclaim:
+        claimName: maven-source-pvc
+  resources:
+    - name: docker-image
+      resourceRef:
+        name: backend-image-resource

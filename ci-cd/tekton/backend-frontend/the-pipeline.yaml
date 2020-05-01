@@ -1,0 +1,83 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: the-pipeline
+spec:
+  resources:
+    - name: backend-docker-image
+      type: image
+    - name: frontend-docker-image
+      type: image
+  workspaces:
+    - name: shared-workspace
+    - name: maven-settings
+  tasks:
+    - name: fetch-repository
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: https://github.com/jzoric/ci-cd-apps
+        - name: subdirectory
+          value: ""
+        - name: deleteExisting
+          value: "true"
+    - name: maven-run-test
+      taskRef:
+        name: maven
+      params:
+        - name: WORKING_DIRECTORY
+          value: backend
+        - name: GOALS
+          value:
+            - test
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: maven-settings
+          workspace: maven-settings
+        - name: source
+          workspace: shared-workspace
+    - name: maven-run-package
+      taskRef:
+        name: maven
+      params:
+        - name: WORKING_DIRECTORY
+          value: backend
+        - name: GOALS
+          value:
+            - package
+      runAfter:
+        - maven-run-test
+      workspaces:
+        - name: maven-settings
+          workspace: maven-settings
+        - name: source
+          workspace: shared-workspace
+    - name: backend-build-push
+      taskRef:
+        name: backend-build-push
+      runAfter:
+        - maven-run-package
+      resources:
+        outputs:
+          - name: builtImage
+            resource: backend-docker-image
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+    - name: frontend-build-push
+      taskRef:
+        name: frontend-build-push
+      runAfter:
+        - fetch-repository
+      resources:
+        outputs:
+          - name: builtImage
+            resource: frontend-docker-image
+      workspaces:
+        - name: source
+          workspace: shared-workspace

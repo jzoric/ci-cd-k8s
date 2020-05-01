@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: backend-image-resource
+spec:
+  type: image
+  params:
+    - name: url
+      value: gcr.io/jovica-gcp/backend
